@@ -1,19 +1,15 @@
 package com.app.testbase;
 
 import com.app.utils.PropertyLoader;
-import org.openqa.selenium.OutputType;
-import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.annotations.*;
-import ru.yandex.qatools.allure.annotations.Attachment;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.util.concurrent.TimeUnit;
@@ -29,6 +25,8 @@ public class WebDriverBase {
     protected String firefoxBin;
     protected String chromeBinary;
     protected String chromeDriver;
+    protected String userName;
+    protected String password;
     public static final PropertyLoader property= new PropertyLoader();
 
     protected static final String BROWSER_CHROME    = "chrome";
@@ -43,6 +41,9 @@ public class WebDriverBase {
         websiteUrl = property.loadProperty("site.url");
         hubUrl = property.loadProperty("hub.address");
         browserName = property.loadProperty("browser.name");
+        userName = property.loadProperty("username.value");
+        password = property.loadProperty("password.value");
+
         DesiredCapabilities desiredCapabilities;
 
 
@@ -72,7 +73,9 @@ public class WebDriverBase {
 
         desiredCapabilities.setJavascriptEnabled(true);
         desiredCapabilities.setCapability("takesScreenshot", false);
-        desiredCapabilities.setBrowserName(browserName);
+        desiredCapabilities.setBrowserName(desiredCapabilities.getBrowserName());
+
+        logger.info(desiredCapabilities.getBrowserName());
 
         _driver = new RemoteWebDriver(new URL(hubUrl), desiredCapabilities);
         _driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
@@ -91,7 +94,9 @@ public class WebDriverBase {
 
     @AfterClass(alwaysRun = true)
     public void tearDown() throws Exception{
-        _driver.close();
-        _driver.quit();
+        if (_driver != null) {
+            _driver.close();
+            _driver.quit();
+        }
     }
 }
